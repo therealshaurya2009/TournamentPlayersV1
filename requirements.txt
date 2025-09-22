@@ -5,4 +5,3 @@ reportlab
 psutil
 jinja2
 python-multipart
-playwright install
