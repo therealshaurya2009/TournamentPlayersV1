@@ -18,6 +18,17 @@ import re
 import requests
 import subprocess
 
+from playwright.async_api import async_playwright
+import asyncio
+
+async def install_browsers():
+    from playwright.__main__ import main as playwright_main
+    import sys
+    sys.argv = ["playwright", "install", "chromium"]
+    await asyncio.to_thread(playwright_main)
+
+# Call this once before setup_browser() (for first run)
+
 
 # --- Stealth Browser Setup with Auto-Scroll + Wait + Timeout ---
 
