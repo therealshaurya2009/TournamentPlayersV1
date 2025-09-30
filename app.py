@@ -40,7 +40,7 @@ if sys.platform.startswith("win"):
 async def setup_browser():
     playwright = await async_playwright().start()
 
-    browser = await playwright.firefox.launch(
+    browser = await playwright.chromium.launch(
         headless=True,
     )
 
