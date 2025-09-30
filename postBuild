@@ -1,9 +1,0 @@
-#!/bin/bash
-# Upgrade pip first
-pip install --upgrade pip
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install Chromium only
-playwright install chromium
