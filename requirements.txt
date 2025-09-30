@@ -1,11 +1,6 @@
-# Core
-streamlit     # stable Streamlit version
-reportlab      # PDF generation
-
-# Playwright
-playwright      # browser automation
-psutil           # manage processes
-nest_asyncio   # allow asyncio loops inside Streamlit
-
-# Optional, but recommended for stable async behavior
-aiohttp           # used internally by Playwright for async requests
+streamlit
+nest_asyncio
+playwright
+reportlab
+psutil
+requests
