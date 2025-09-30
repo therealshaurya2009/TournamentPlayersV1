@@ -25,7 +25,6 @@ import subprocess
 nest_asyncio.apply()
 
 from playwright.async_api import async_playwright
-from scraper import age_groups_level, scrape_draw_size, scrape_tournament_data
 
 # --- Session state for browser ---
 if "playwright_browser" not in st.session_state:
