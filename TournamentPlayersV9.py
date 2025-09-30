@@ -61,6 +61,8 @@ async def setup_browser():
         "--no-zygote",
         "--single-process",
         "--disable-gpu",
+        "--disable-software-rasterizer",
+        "--disable-extensions",
     ],
 
     context = await browser.new_context(
