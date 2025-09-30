@@ -21,7 +21,18 @@ import re
 import requests
 import subprocess
 
+# Apply nested asyncio
 nest_asyncio.apply()
+
+from playwright.async_api import async_playwright
+from scraper import age_groups_level, scrape_draw_size, scrape_tournament_data
+
+# --- Session state for browser ---
+if "playwright_browser" not in st.session_state:
+    st.session_state.playwright_browser = None
+if "playwright_page" not in st.session_state:
+    st.session_state.playwright_page = None
+
 
 # Fix for Windows + Playwright async subprocesses
 if sys.platform.startswith("win"):
@@ -655,7 +666,7 @@ async def main():
         )
         st.write("You selected:", selected_age_group)
 
-        # Single button to analyze tournament
+        # Analyze tournament
         if st.button("Analyze tournament"):
             sort = await scrape_draw_size(
                 tournament_link.replace("overview", "events"), selected_age_group
@@ -669,25 +680,15 @@ async def main():
                 st.session_state.age_options[0]  # use session state
             )
 
-            # Make PDF downloadable in Streamlit
-            with open(pdf_path, "rb") as f:
-                st.download_button(
-                    label="Download Tournament PDF",
-                    data=f,
-                    file_name=os.path.basename(pdf_path),
-                    mime="application/pdf"
-                )
+            # Make PDF downloadable
+            if pdf_path and os.path.exists(pdf_path):
+                with open(pdf_path, "rb") as f:
+                    st.download_button(
+                        label="Download Tournament PDF",
+                        data=f,
+                        file_name=os.path.basename(pdf_path),
+                        mime="application/pdf"
+                    )
 
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except Exception as e:
-        print("Error:", e)
-    finally:
-        # ✅ Force close leftover Chrome/Chromium processes
-        for proc in psutil.process_iter(attrs=['pid', 'name']):
-            if proc.info['name'] and ("chrome" in proc.info['name'].lower() or "chromium" in proc.info['name'].lower()):
-                try:
-                    proc.send_signal(signal.SIGKILL)
-                except Exception:
-                    pass
+# ✅ Run without asyncio.run()
+asyncio.get_event_loop().run_until_complete(main())
