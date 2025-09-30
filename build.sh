@@ -1,30 +1,15 @@
 #!/usr/bin/env bash
-
-# Exit if any command fails
 set -e
 
 # Install system dependencies for Playwright
 apt-get update && apt-get install -y \
-    libgtk-3-0 \
-    libx11-xcb1 \
-    libnss3 \
-    libgdk-pixbuf2.0-0 \
-    libgkcodecs \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libxss1 \
-    libxtst6 \
-    libatspi2.0-0 \
-    fonts-liberation \
-    libxkbcommon0 \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    libnss3 libx11-xcb1 libasound2 libatk1.0-0 libcups2 \
+    libxcomposite1 libxdamage1 libxrandr2 libxss1 libxtst6 \
+    fonts-liberation libpangocairo-1.0-0 \
+    --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Install Playwright browsers
+# Install Chromium only
 playwright install chromium
