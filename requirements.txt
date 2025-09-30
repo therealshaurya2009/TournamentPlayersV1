@@ -1,11 +1,11 @@
 # Core
-streamlit==1.26.1          # stable Streamlit version
-reportlab==4.0.0           # PDF generation
+streamlit     # stable Streamlit version
+reportlab      # PDF generation
 
 # Playwright
-playwright==1.46.0         # browser automation
-psutil==5.9.5              # manage processes
-nest_asyncio==1.5.8        # allow asyncio loops inside Streamlit
+playwright      # browser automation
+psutil           # manage processes
+nest_asyncio   # allow asyncio loops inside Streamlit
 
 # Optional, but recommended for stable async behavior
-aiohttp==3.9.0             # used internally by Playwright for async requests
+aiohttp           # used internally by Playwright for async requests
