@@ -21,6 +21,8 @@ import re
 import requests
 import subprocess
 
+nest_asyncio.apply()
+
 # Fix for Windows + Playwright async subprocesses
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -628,12 +630,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
         
 nest_asyncio.apply()  # allow nested event loops in Streamlit
 
-# Helper to run async functions
-def run_async(coro):
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(coro)
-
-def main():
+async def main():
     st.title("USTA Tennis Tournament Analyzer")
 
     # Input from user
@@ -647,7 +644,7 @@ def main():
 
     # Button to fetch age groups
     if st.button("Find age groups:"):
-        age_options = run_async(age_groups_level(tournament_link))
+        age_options = await age_groups_level(tournament_link)
         st.session_state.age_groups_final = age_options[2]  # store age groups
         st.session_state.age_options = age_options  # store full options
 
@@ -660,17 +657,17 @@ def main():
 
         # Single button to analyze tournament
         if st.button("Analyze tournament"):
-            sort = run_async(scrape_draw_size(
+            sort = await scrape_draw_size(
                 tournament_link.replace("overview", "events"), selected_age_group
-            ))
+            )
 
-            pdf_path = run_async(scrape_tournament_data(
+            pdf_path = await scrape_tournament_data(
                 tournament_link.lower(),
                 selected_age_group,
                 sort[0],
                 sort[1],
                 st.session_state.age_options[0]  # use session state
-            ))
+            )
 
             # Make PDF downloadable in Streamlit
             with open(pdf_path, "rb") as f:
@@ -683,7 +680,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        main()
+        asyncio.run(main())
     except Exception as e:
         print("Error:", e)
     finally:
