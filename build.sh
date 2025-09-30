@@ -3,4 +3,4 @@
 pip install -r requirements.txt
 
 # Install playwright browsers (Chromium + Firefox)
-playwright install chromium firefox
+playwright install firefox
