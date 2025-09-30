@@ -44,6 +44,17 @@ async def setup_browser():
         headless=True,
     )
 
+    args=[
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu",
+    ],
+
     context = await browser.new_context(
         viewport={"width": 1920, "height": 1080},
         java_script_enabled=True,
