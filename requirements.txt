@@ -1,0 +1,6 @@
+streamlit
+asyncio
+nest_asyncio
+playwright
+reportlab
+psutil
