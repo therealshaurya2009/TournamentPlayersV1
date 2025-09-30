@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# Install dependencies
+
+# Exit immediately if any command fails
+set -e
+
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Install playwright browsers (Chromium + Firefox)
-playwright install firefox
+# Install all Playwright browsers
+playwright install
+
+# (Optional) any other setup commands can go here
