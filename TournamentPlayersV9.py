@@ -40,11 +40,6 @@ if sys.platform.startswith("win"):
 import os
 from playwright.async_api import async_playwright
 
-# Force install if missing
-if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
-    os.system("playwright install chromium")
-
-
 async def setup_browser():
     playwright = await async_playwright().start()
 
