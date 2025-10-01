@@ -4,5 +4,3 @@ playwright
 reportlab
 psutil
 requests
-gunicorn
-Flask
