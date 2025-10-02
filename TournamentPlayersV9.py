@@ -42,13 +42,13 @@ from playwright.async_api import async_playwright
 
 # Force install if missing
 if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
-    os.system("playwright install chromium")
+    os.system("playwright install firefox")
 
 
 async def setup_browser():
     playwright = await async_playwright().start()
 
-    browser = await playwright.chromium.launch(
+    browser = await playwright.firefox.launch(
         headless=True,
     )
 
