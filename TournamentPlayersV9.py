@@ -44,48 +44,44 @@ from playwright.async_api import async_playwright
 if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
     os.system("playwright install chromium")
 
-
 async def setup_browser():
     playwright = await async_playwright().start()
 
-    browser = await playwright.chromium.launch(
-        headless=True,
-    )
+    # Try to find system Chrome (adjust path if needed)
+    chrome_path = shutil.which("chrome") or shutil.which("google-chrome") or shutil.which("chrome.exe")
+    if not chrome_path:
+        chrome_path = playwright.chromium.executable_path
 
-    args=[
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
-        "--disable-gpu",
-    ],
+    browser = await playwright.chromium.launch(
+        headless=True,   # change to True if you want headless
+        executable_path=chrome_path,
+        args=[
+            "--disable-blink-features=AutomationControlled",
+            "--disable-infobars",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--window-size=1920,1080",
+            "--start-maximized",
+        ]
+    )
 
     context = await browser.new_context(
         viewport={"width": 1920, "height": 1080},
-        java_script_enabled=True,
-        device_scale_factor=1,
-        is_mobile=False,
-        has_touch=False,
         user_agent=(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/115.0.0.0 Safari/537.36"
         ),
-    )
-
-    context = await browser.new_context(
-        viewport={"width": 1920, "height": 1080},
         java_script_enabled=True,
-        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        device_scale_factor=1,
+        is_mobile=False,
+        has_touch=False
     )
 
-    
     page = await context.new_page()
 
-    # --- Hide headless indicators for stealth ---
+    # 🔒 Hide headless indicators
     await page.add_init_script("""
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
         Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
@@ -93,9 +89,12 @@ async def setup_browser():
         window.chrome = { runtime: {} };
     """)
 
-    # --- goto_full helper ---
+    # --- Helper: goto with timeout, wait for selector, then scroll fully ---
     async def goto_full(url: str, wait_for: str = None, timeout: int = 15000):
-        # Ensure full URL
+        if not url or not isinstance(url, str):
+            raise ValueError(f"Invalid URL passed to goto_full: {url}")
+
+        # Ensure proper scheme
         if url.startswith("/"):
             url = "https://playtennis.usta.com" + url
         elif not url.startswith("http"):
@@ -103,28 +102,24 @@ async def setup_browser():
 
         print(f"[goto_full] Navigating to: {url}")
         try:
-            # Wait for page navigation
-            await asyncio.wait_for(page.goto(url), timeout=timeout / 1000)
+            # hard timeout wrapper
+            await asyncio.wait_for(page.goto(url), timeout=timeout / 1000)  # convert ms→s
             if wait_for:
                 await page.wait_for_selector(wait_for, timeout=timeout)
 
-            # 🔽 Scroll repeatedly until bottom stops changing
+            # 🔽 Auto-scroll until bottom stops changing
             last_height = 0
-            scroll_attempts = 0
-            while scroll_attempts < 30:  # Max 30 scrolls to prevent infinite loops
+            while True:
                 await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
-                await asyncio.sleep(1.2)
+                await asyncio.sleep(1)
                 new_height = await page.evaluate("document.body.scrollHeight")
                 if new_height == last_height:
                     break
                 last_height = new_height
-                scroll_attempts += 1
-
-            # Extra wait for JS-rendered content (player names) to appear
-            await asyncio.sleep(2)
 
         except (asyncio.TimeoutError, PlaywrightTimeoutError) as e:
             print(f"[goto_full] Timeout or navigation error for {url}: {e}")
+            # 🚨 Force close if stuck
             try:
                 await page.close()
             except:
@@ -132,8 +127,9 @@ async def setup_browser():
             await context.close()
             await browser.close()
             await playwright.stop()
-            raise
+            raise  # re-raise so caller knows it failed
 
+    # Attach helper
     page.goto_full = goto_full
 
     return playwright, browser, context, page
