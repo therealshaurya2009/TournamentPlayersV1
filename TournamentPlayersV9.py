@@ -547,6 +547,12 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     for i in player_wtns[:total_players]:
         seeds_temp.append(i)
 
+    # ensure num_seeds is an integer, default to full list if missing/invalid
+    try:
+        num_seeds = int(num_seeds)
+    except (ValueError, TypeError):
+        num_seeds = len(seeds_temp)
+
     seeds_temp.sort()
     seeds_temp = seeds_temp[0:num_seeds]
 
