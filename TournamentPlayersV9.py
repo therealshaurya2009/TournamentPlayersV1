@@ -683,7 +683,7 @@ async def main():
     # Button to fetch age groups
     if st.button("Find age groups:"):
         age_options = await age_groups_level(tournament_link)
-        st.session_state.age_groups_final = age_options[2]  # store age groups
+        st.session_state.age_groups_final = age_options[-1]  # store age groups
         st.session_state.age_options = age_options  # store full options
 
     # Show dropdown if we have age groups
