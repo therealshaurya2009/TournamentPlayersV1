@@ -44,17 +44,15 @@ from playwright.async_api import async_playwright
 if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
     os.system("playwright install chromium")
 
+import asyncio
+from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
+
 async def setup_browser():
     playwright = await async_playwright().start()
 
-    # Try to find system Chrome (adjust path if needed)
-    chrome_path = shutil.which("chrome") or shutil.which("google-chrome") or shutil.which("chrome.exe")
-    if not chrome_path:
-        chrome_path = playwright.chromium.executable_path
-
+    # ✅ Launch using Playwright’s built-in Chromium (don’t override executable_path)
     browser = await playwright.chromium.launch(
-        headless=True,   # change to True if you want headless
-        executable_path=chrome_path,
+        headless=True,
         args=[
             "--disable-blink-features=AutomationControlled",
             "--disable-infobars",
@@ -63,9 +61,10 @@ async def setup_browser():
             "--disable-gpu",
             "--window-size=1920,1080",
             "--start-maximized",
-        ]
+        ],
     )
 
+    # ✅ Create clean browser context with human-like headers
     context = await browser.new_context(
         viewport={"width": 1920, "height": 1080},
         user_agent=(
@@ -76,12 +75,12 @@ async def setup_browser():
         java_script_enabled=True,
         device_scale_factor=1,
         is_mobile=False,
-        has_touch=False
+        has_touch=False,
     )
 
     page = await context.new_page()
 
-    # 🔒 Hide headless indicators
+    # ✅ Hide Playwright automation fingerprints
     await page.add_init_script("""
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
         Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
@@ -89,12 +88,11 @@ async def setup_browser():
         window.chrome = { runtime: {} };
     """)
 
-    # --- Helper: goto with timeout, wait for selector, then scroll fully ---
-    async def goto_full(url: str, wait_for: str = None, timeout: int = 15000):
+    # --- Helper: goto with timeout, scroll, and safe error handling ---
+    async def goto_full(url: str, wait_for: str = None, timeout: int = 20000):
         if not url or not isinstance(url, str):
             raise ValueError(f"Invalid URL passed to goto_full: {url}")
 
-        # Ensure proper scheme
         if url.startswith("/"):
             url = "https://playtennis.usta.com" + url
         elif not url.startswith("http"):
@@ -102,12 +100,15 @@ async def setup_browser():
 
         print(f"[goto_full] Navigating to: {url}")
         try:
-            # hard timeout wrapper
-            await asyncio.wait_for(page.goto(url), timeout=timeout / 1000)  # convert ms→s
+            await asyncio.wait_for(
+                page.goto(url, wait_until="domcontentloaded"),
+                timeout=timeout / 1000,
+            )
+
             if wait_for:
                 await page.wait_for_selector(wait_for, timeout=timeout)
 
-            # 🔽 Auto-scroll until bottom stops changing
+            # 🔽 Auto-scroll to bottom for dynamic content
             last_height = 0
             while True:
                 await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
@@ -117,21 +118,17 @@ async def setup_browser():
                     break
                 last_height = new_height
 
+            # 🧠 Log partial HTML for debugging on Render
+            html_preview = await page.content()
+            print("[goto_full] First 300 chars of loaded page:\n", html_preview[:300])
+
         except (asyncio.TimeoutError, PlaywrightTimeoutError) as e:
             print(f"[goto_full] Timeout or navigation error for {url}: {e}")
-            # 🚨 Force close if stuck
-            try:
-                await page.close()
-            except:
-                pass
-            await context.close()
-            await browser.close()
-            await playwright.stop()
-            raise  # re-raise so caller knows it failed
 
     # Attach helper
     page.goto_full = goto_full
 
+    print("✅ Browser setup complete and ready.")
     return playwright, browser, context, page
 
 async def age_groups_level(tournament_link):
