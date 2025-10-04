@@ -18,8 +18,5 @@ apt-get update && apt-get install -y \
     lsb-release \
     xdg-utils
 
-# Install Python dependencies
 pip install -r requirements.txt
-
-# Install Playwright browsers (Chromium + Firefox)
-playwright install
+playwright install --with-deps
