@@ -460,7 +460,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     print("Found", len(player_links), "players. Starting information search...")
 
     # Helper to run tasks in batches of 10
-    async def gather_in_batches(tasks, batch_size=25):
+    async def gather_in_batches(tasks, batch_size=2):
         results = []
         for i in range(0, len(tasks), batch_size):
             batch = tasks[i:i + batch_size]
@@ -472,7 +472,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     tasks = [scrape_player(link, age_group) for link in player_links]
 
     # Run them in batches of 10
-    player_data = await gather_in_batches(tasks, batch_size=25)
+    player_data = await gather_in_batches(tasks, batch_size=2)
 
     # Filter out failed scrapes
     player_data = [data for data in player_data if data is not None]
