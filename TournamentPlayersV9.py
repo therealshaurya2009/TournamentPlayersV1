@@ -37,20 +37,25 @@ if "playwright_page" not in st.session_state:
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-import os
-from playwright.async_api import async_playwright
 
 # Force install if missing
 if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
     os.system("playwright install chromium")
 
-import asyncio
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
+async def setup_browser(retries: int = 3, timeout: int = 60000):
+    """
+    Setup Playwright Chromium browser for cloud scraping.
+    
+    Args:
+        retries (int): number of navigation retries if page loads empty
+        timeout (int): maximum timeout for navigation / selector wait in ms
+    
+    Returns:
+        playwright, browser, context, page
+    """
 
-async def setup_browser():
     playwright = await async_playwright().start()
 
-    # ✅ Launch using Playwright’s built-in Chromium (don’t override executable_path)
     browser = await playwright.chromium.launch(
         headless=True,
         args=[
@@ -61,10 +66,9 @@ async def setup_browser():
             "--disable-gpu",
             "--window-size=1920,1080",
             "--start-maximized",
-        ],
+        ]
     )
 
-    # ✅ Create clean browser context with human-like headers
     context = await browser.new_context(
         viewport={"width": 1920, "height": 1080},
         user_agent=(
@@ -80,16 +84,22 @@ async def setup_browser():
 
     page = await context.new_page()
 
-    # ✅ Hide Playwright automation fingerprints
+    # Hide Playwright automation fingerprints
     await page.add_init_script("""
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-        Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
-        Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3]});
+        Object.defineProperty(navigator, 'languages', {get: () => ['en-US','en']});
         window.chrome = { runtime: {} };
     """)
 
-    # --- Helper: goto with timeout, scroll, and safe error handling ---
-    async def goto_full(url: str, wait_for: str = None, timeout: int = 20000):
+    async def goto_full(url: str, wait_for: str = None):
+        """
+        Navigate to a page with retries, scrolling, and optional selector wait.
+        
+        Args:
+            url (str): URL to visit
+            wait_for (str): CSS selector to wait for (optional)
+        """
         if not url or not isinstance(url, str):
             raise ValueError(f"Invalid URL passed to goto_full: {url}")
 
@@ -98,34 +108,44 @@ async def setup_browser():
         elif not url.startswith("http"):
             url = "https://" + url.lstrip("/")
 
-        print(f"[goto_full] Navigating to: {url}")
-        try:
-            await asyncio.wait_for(
-                page.goto(url, wait_until="domcontentloaded"),
-                timeout=timeout / 1000,
-            )
+        for attempt in range(retries):
+            print(f"[goto_full] Attempt {attempt+1}: Navigating to {url}")
+            try:
+                await asyncio.wait_for(
+                    page.goto(url, wait_until="domcontentloaded"),
+                    timeout=timeout / 200
+                )
 
-            if wait_for:
-                await page.wait_for_selector(wait_for, timeout=timeout)
+                # Wait for specific selector if provided
+                if wait_for:
+                    await page.wait_for_selector(wait_for, timeout=timeout)
 
-            # 🔽 Auto-scroll to bottom for dynamic content
-            last_height = 0
-            while True:
-                await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
-                await asyncio.sleep(1)
-                new_height = await page.evaluate("document.body.scrollHeight")
-                if new_height == last_height:
+                # Small delay to let JS load
+                await asyncio.sleep(2)
+
+                # Scroll to bottom for dynamic content
+                last_height = 0
+                while True:
+                    await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
+                    await asyncio.sleep(1)
+                    new_height = await page.evaluate("document.body.scrollHeight")
+                    if new_height == last_height:
+                        break
+                    last_height = new_height
+
+                # Log partial HTML for debugging
+                html_preview = await page.content()
+                print("[goto_full] First 1000 chars of loaded page:\n", html_preview[:1000])
+
+                # Break loop if selector exists or assume page loaded
+                if not wait_for or await page.query_selector(wait_for):
                     break
-                last_height = new_height
 
-            # 🧠 Log partial HTML for debugging on Render
-            html_preview = await page.content()
-            print("[goto_full] First 300 chars of loaded page:\n", html_preview[:300])
+            except (asyncio.TimeoutError, PlaywrightTimeoutError) as e:
+                print(f"[goto_full] Navigation attempt {attempt+1} failed: {e}")
+                await asyncio.sleep(3)  # wait before retry
 
-        except (asyncio.TimeoutError, PlaywrightTimeoutError) as e:
-            print(f"[goto_full] Timeout or navigation error for {url}: {e}")
-
-    # Attach helper
+    # Attach helper function to page
     page.goto_full = goto_full
 
     print("✅ Browser setup complete and ready.")
