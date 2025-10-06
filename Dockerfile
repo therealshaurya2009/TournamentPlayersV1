@@ -11,6 +11,6 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose a port for Streamlit
-EXPOSE 10000
+EXPOSE 8501
 
 CMD sh -c "streamlit run TournamentPlayersV9.py --server.port ${PORT:-8501} --server.address 0.0.0.0"
