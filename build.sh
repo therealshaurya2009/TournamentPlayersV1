@@ -1,22 +1,48 @@
 #!/usr/bin/env bash
-# Update apt and install required system dependencies for Playwright browsers
-apt-get update && apt-get install -y \
-    libgdk-pixbuf2.0-0 \
-    libx11-xcb1 \
+set -e  # stop on errors
+
+# Prevent interactive prompts
+export DEBIAN_FRONTEND=noninteractive
+
+# Update package list
+apt-get update
+
+# Install Playwright dependencies
+apt-get install -y \
+    libglib2.0-0 \
+    libglib2.0-dev \
+    libgobject-2.0-0 \
+    libnss3 \
+    libnspr4 \
+    libnssutil3 \
+    libdbus-1-3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libexpat1 \
+    libatspi2.0-0 \
+    libx11-6 \
     libxcomposite1 \
     libxdamage1 \
-    libxrandr2 \
-    libxrender1 \
     libxext6 \
-    libgtk-3-0 \
-    libnss3 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libxcb1 \
+    libxkbcommon0 \
     libasound2 \
-    libgkcodecs0 \
-    wget \
-    ca-certificates \
     fonts-liberation \
-    lsb-release \
-    xdg-utils
+    wget \
+    curl \
+    unzip \
+    xdg-utils \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-pip install -r requirements.txt
-playwright install --with-deps
+# Install Python dependencies
+pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright browsers
+playwright install
+
+# Start the app
+streamlit run TournamentPlayersV9.py
