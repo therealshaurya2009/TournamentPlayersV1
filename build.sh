@@ -43,6 +43,3 @@ pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright browsers
 playwright install
-
-# Start the app
-streamlit run TournamentPlayersV9.py
