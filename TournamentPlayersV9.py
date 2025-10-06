@@ -400,6 +400,19 @@ async def scrape_draw_size(link, selected_age_group):
 
 
 async def scrape_player(player_link, age_group):
+    player_info = await scrape_usta(player_link, age_group)
+    return {
+        "Name": player_info[0],
+        "Profile": player_link,
+        "Location": player_info[1],
+        "District": player_info[2],
+        "WTN": player_info[3],
+        "Points": player_info[4],
+        "Ranking": player_info[5],
+        "Recruiting": player_info[6],
+        "Class": player_info[8],
+        "UTR": player_info[7],
+    }
     try:
         player_info = await scrape_usta(player_link, age_group)
         return {
