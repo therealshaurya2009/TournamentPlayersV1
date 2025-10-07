@@ -243,9 +243,9 @@ async def scrape_recruiting(name, location, page):
 async def scrape_usta(player_link, age_group, max_retries: int = 5):
     retries = 0
     while retries < max_retries:
-        await page.goto(player_link + "&tab=about")
         retries += 1
         playwright, browser, context, page = await setup_browser()
+        await page.goto(player_link + "&tab=about")
         player_name_selector = "span.readonly-text__text > h3"
         await page.wait_for_selector(player_name_selector, timeout=10000)
         locator = page.locator(player_name_selector)
