@@ -255,6 +255,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         playwright, browser, context, page = await setup_browser()
         try:
             await page.goto(player_link + "&tab=about", wait_until="networkidle")
+            await page.screenshot(path="debug_player_page.png", full_page=True)
 
             try:
                 player_name_selector = "span.readonly-text__text > h3"
