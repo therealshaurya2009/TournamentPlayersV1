@@ -122,7 +122,7 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
             try:
                 await asyncio.wait_for(
                     page.goto(url, wait_until="domcontentloaded"),
-                    timeout=timeout / 200
+                    timeout=timeout / 1000
                 )
 
                 # Wait for specific selector if provided
