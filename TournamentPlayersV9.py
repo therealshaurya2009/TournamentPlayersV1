@@ -247,7 +247,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         playwright, browser, context, page = await setup_browser()
         await page.goto(player_link + "&tab=about", wait_until="networkidle")
         player_name_selector = "span.readonly-text__text > h3"
-        await page.wait_for_selector(player_name_selector, timeout=10000)
+        await page.wait_for_selector(player_name_selector, timeout=25000)
         locator = page.locator(player_name_selector)
         player_name = await locator.text_content()
         player_name = player_name.strip()
