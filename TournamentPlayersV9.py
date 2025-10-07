@@ -42,6 +42,14 @@ if sys.platform.startswith("win"):
 if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
     os.system("playwright install chromium")
 
+from playwright_extra import PlaywrightExtra
+from playwright_extra_plugin_stealth import stealth
+
+# Create a stealth-enabled Playwright instance
+playwright = PlaywrightExtra()
+playwright.use(stealth())  # automatically applies stealth tricks
+
+
 async def setup_browser(retries: int = 3, timeout: int = 60000):
     """
     Setup Playwright Chromium browser for cloud scraping.
