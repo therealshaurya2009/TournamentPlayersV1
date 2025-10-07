@@ -243,6 +243,7 @@ async def scrape_recruiting(name, location, page):
 async def scrape_usta(player_link, age_group, max_retries: int = 5):
     retries = 0
     while retries < max_retries:
+        await page.goto(player_link + "&tab=about")
         retries += 1
         playwright, browser, context, page = await setup_browser()
         player_name_selector = "span.readonly-text__text > h3"
@@ -252,7 +253,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         player_name = player_name.strip()
         
         try:
-            await page.goto(player_link + "&tab=about")
+            await page.goto(player_link + "&tab=about", wait_until="networkidle")
 
             try:
                 player_name_selector = "span.readonly-text__text > h3"
