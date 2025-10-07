@@ -57,6 +57,12 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
 
     playwright = await async_playwright().start()
 
+    proxy = {
+        "server": "brd.superproxy.io:33335",
+        "username": "brd-customer-hl_007d5d9e-zone-residential_proxy1",
+        "password": "74ahzyjtxe6e"
+    }
+
     browser = await playwright.chromium.launch(
         headless=True,
         args=[
@@ -67,8 +73,10 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
             "--disable-gpu",
             "--window-size=1920,1080",
             "--start-maximized",
-        ]
+        ],
+        proxy=proxy,  # ✅ add this
     )
+
 
     context = await browser.new_context(
         viewport={"width": 1920, "height": 1080},
