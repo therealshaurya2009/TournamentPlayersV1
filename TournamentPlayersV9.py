@@ -404,6 +404,7 @@ async def scrape_draw_size(link, selected_age_group):
 
 
 async def scrape_player(player_link, age_group):
+    st.write(player_link, age_group)
     try:
         player_info = await scrape_usta(player_link, age_group)
         return {
