@@ -247,14 +247,27 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
     while retries < max_retries:
         retries += 1
         playwright, browser, context, page = await setup_browser()
-        await page.goto(player_link + "&tab=about", wait_until="networkidle")
-        await page.wait_for_selector("body", timeout=10000)
-        html = await page.content()
-        os.makedirs("html_downloads", exist_ok=True)
-        path = os.path.join("html_downloads", "Test")
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(html)
+        await page.goto(player_link + "&tab=about", wait_until="domcontentloaded", timeout=60000)
 
+        # Extra delay because USTA pages are rendered asynchronously
+        await page.wait_for_timeout(4000)
+
+        # Try multiple possible selectors
+        possible_selectors = [
+            "span.readonly-text__text h3",           # main one
+            "div.readonly-text__content h3",         # fallback 1
+            "div[data-element-name='fullName'] h3",  # fallback 2
+        ]
+
+        player_name = None
+        for selector in possible_selectors:
+            await page.wait_for_selector(selector, timeout=5000)
+            locator = page.locator(selector)
+            text = await locator.first.text_content()
+            if text:
+                player_name = text.strip()
+                st.write(player_name)
+                break
         try:
             await page.goto(player_link + "&tab=about", wait_until="networkidle")
         
