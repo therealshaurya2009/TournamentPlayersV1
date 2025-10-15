@@ -254,7 +254,6 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
 
         # Try multiple possible selectors
         possible_selectors = [
-            "span.readonly-text__text h3",           # main one
             "div.readonly-text__content h3",         # fallback 1
             "div[data-element-name='fullName'] h3",  # fallback 2
         ]
