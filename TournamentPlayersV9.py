@@ -251,6 +251,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         playwright, browser, context, page = await setup_browser()        
         try:
             await page.goto(player_link + "&tab=about", wait_until="networkidle")
+            await page.wait_for_timeout(5000)  # give JS time to render
         
             try:
                 player_name_selector = "//*[@id='container-cdeaf649fc']/div/div[1]/div[1]/div/div/span/h3"
