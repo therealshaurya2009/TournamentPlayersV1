@@ -251,22 +251,13 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
 
         # Extra delay because USTA pages are rendered asynchronously
         await page.wait_for_timeout(4000)
-
-        # Try multiple possible selectors
-        possible_selectors = [
-            "div.readonly-text__content h3",         # fallback 1
-            "div[data-element-name='fullName'] h3",  # fallback 2
-        ]
-
-        player_name = None
-        for selector in possible_selectors:
-            await page.wait_for_selector(selector, timeout=5000)
-            locator = page.locator(selector)
-            text = await locator.first.text_content()
-            if text:
-                player_name = text.strip()
-                st.write(player_name)
-                break
+        await page.wait_for_selector("div[data-element-name='fullName'] h3", timeout=5000)
+        locator = page.locator(selector)
+        text = await locator.first.text_content()
+        if text:
+            player_name = text.strip()
+            st.write(player_name)
+            break
         try:
             await page.goto(player_link + "&tab=about", wait_until="networkidle")
         
