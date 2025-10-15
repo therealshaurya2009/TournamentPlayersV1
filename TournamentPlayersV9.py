@@ -251,7 +251,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         await page.wait_for_selector("body", timeout=10000)
         html = await page.content()
         os.makedirs("html_downloads", exist_ok=True)
-        path = os.path.join("html_downloads", filename)
+        path = os.path.join("html_downloads", "Test")
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
 
