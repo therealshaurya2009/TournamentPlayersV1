@@ -248,16 +248,14 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         retries += 1
         playwright, browser, context, page = await setup_browser()
         await page.goto(player_link + "&tab=about", wait_until="domcontentloaded", timeout=60000)
-
-        # Extra delay because USTA pages are rendered asynchronously
-        await page.wait_for_timeout(4000)
-        await page.wait_for_selector("div[data-element-name='fullName'] h3", timeout=5000)
-        locator = page.locator(selector)
-        text = await locator.first.text_content()
-        if text:
-            player_name = text.strip()
-            st.write(player_name)
-            break
+        st.write("Player Profile Opened")
+        player_name_selector = "span.readonly-text__text > h3"
+        await page.wait_for_selector(player_name_selector, state="attached",  timeout=60000)
+        locator = page.locator(player_name_selector)
+        player_name = await locator.text_content()
+        player_name = player_name.strip()
+        st.write(player_name)
+        
         try:
             await page.goto(player_link + "&tab=about", wait_until="networkidle")
         
