@@ -253,7 +253,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
             await page.goto(player_link + "&tab=about", wait_until="networkidle")
         
             try:
-                player_name_selector = "/html/body/div[5]/div/div[2]/div/div/div[3]/div/div/div[1]/div/div/div[2]/div/form/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div/div/span/h3"
+                player_name_selector = "//*[@id="container-cdeaf649fc"]/div/div[1]/div[1]/div/div/span/h3"
                 await page.wait_for_selector(f"xpath={player_name_selector}", timeout=10000)
                 locator = page.locator(player_name_selector)
                 player_name = await locator.text_content()
