@@ -248,7 +248,6 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         retries += 1
         playwright, browser, context, page = await setup_browser()
         await page.goto(player_link + "&tab=about", wait_until="networkidle")
-        html = await page.content()
         st.write(player_link + "&tab=about")
 
         try:
