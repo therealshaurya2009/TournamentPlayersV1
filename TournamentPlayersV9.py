@@ -321,7 +321,6 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
             else:
                 recruiting_rating[0] = "Unknown"
 
-            # ✅ Close resources
             await context.close()
             await browser.close()
             await playwright.stop()
