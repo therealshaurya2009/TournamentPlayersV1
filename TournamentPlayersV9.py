@@ -261,8 +261,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
                 player_name = player_name.strip()
             except:
                 player_name = "Unknown Player"
-            st.write(player_name)
-
+            
             try:
                 await page.wait_for_selector(".readonly-text__content", timeout=10000)
                 player_location = await page.locator(".readonly-text__content").nth(1).inner_text()
