@@ -40,14 +40,14 @@ if sys.platform.startswith("win"):
 
 # Force install if missing
 if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
-    os.system("playwright install firefox")
+    os.system("playwright install chromium")
 
 
 async def setup_browser(retries: int = 3, timeout: int = 60000):
 
     playwright = await async_playwright().start()
 
-    browser = await playwright.firefox.launch(
+    browser = await playwright.chromium.launch(
         headless=True,
         args=[
             "--disable-blink-features=AutomationControlled",
