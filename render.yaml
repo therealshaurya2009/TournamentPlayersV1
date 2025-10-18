@@ -4,10 +4,11 @@ services:
     env: python
     plan: free  # can be starter/standard if you need more RAM
     buildCommand: |
+      apt-get update
+      apt-get install -y firefox-esr
+      playwright install-deps
+      playwright install firefox
       pip install -r requirements.txt
-      # Install system dependencies and Firefox for Playwright
-      npx playwright install-deps
-      npx playwright install chromium
     startCommand: |
       streamlit run TournamentPlayersV9.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
     envVars:
