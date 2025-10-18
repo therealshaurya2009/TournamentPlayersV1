@@ -242,7 +242,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         retries += 1
         playwright, browser, context, page = await setup_browser()        
         try:
-            await page.goto(player_link + "&tab=about", wait_until="networkidle")
+            await page.goto(player_link, wait_until="networkidle")
             await page.wait_for_timeout(5000)  # give JS time to render
         
             try:
