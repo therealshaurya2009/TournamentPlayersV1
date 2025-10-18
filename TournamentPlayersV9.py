@@ -243,6 +243,7 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         playwright, browser, context, page = await setup_browser()        
         try:
             await page.goto(player_link, wait_until="networkidle")
+            await page.wait_for_selector("div.tournament-card", timeout=15000)
             await page.wait_for_timeout(5000)  # give JS time to render
         
             try:
