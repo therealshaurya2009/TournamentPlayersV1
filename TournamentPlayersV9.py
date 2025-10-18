@@ -44,16 +44,6 @@ if not os.path.exists(os.path.expanduser("~/.cache/ms-playwright")):
 
 
 async def setup_browser(retries: int = 3, timeout: int = 60000):
-    """
-    Setup Playwright Chromium browser for cloud scraping.
-    
-    Args:
-        retries (int): number of navigation retries if page loads empty
-        timeout (int): maximum timeout for navigation / selector wait in ms
-    
-    Returns:
-        playwright, browser, context, page
-    """
 
     playwright = await async_playwright().start()
 
