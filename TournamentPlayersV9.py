@@ -55,9 +55,11 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
             "--no-sandbox",
             "--disable-dev-shm-usage",
             "--disable-gpu",
+            "--single-process",
+            "--disable-software-rasterizer",
             "--window-size=1920,1080",
             "--start-maximized",
-            "--ignore-certificate-errors",  # Ignore SSL errors
+            "--ignore-certificate-errors",
             "--disable-extensions",
         ],
     )
