@@ -496,20 +496,37 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
 
     print("Found", len(player_links), "players. Starting information search...")
 
-    # Helper to run tasks in batches of 10
+    # Create a progress bar in Streamlit
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    total_players = len(player_links)
+    results = []
+
+    # Helper to run tasks in batches
     async def gather_in_batches(tasks, batch_size=2):
-        results = []
+        nonlocal results
         for i in range(0, len(tasks), batch_size):
             batch = tasks[i:i + batch_size]
             batch_results = await asyncio.gather(*batch)
             results.extend(batch_results)
+
+            # Update progress bar
+            progress = min(int((len(results) / total_players) * 100), 100)
+            progress_bar.progress(progress)
+            status_text.text(f"Scraped {len(results)} of {total_players} players...")
+
         return results
 
     # Create tasks
     tasks = [scrape_player(link, age_group) for link in player_links]
 
-    # Run them in batches of 10
+    # Run tasks in batches
     player_data = await gather_in_batches(tasks, batch_size=2)
+
+    # Finalize progress bar
+    progress_bar.progress(100)
+    status_text.text("✅ All player data collected!")
 
     # Filter out failed scrapes
     player_data = [data for data in player_data if data is not None]
