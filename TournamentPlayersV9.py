@@ -244,6 +244,9 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         await page.goto(player_link, wait_until="networkidle")
         await page.wait_for_timeout(5000)  # give JS time to render
         st.write("Page Open!")
+        html = await page.content()
+        for i in html:
+            st.write(i)
         player_name_selector = "span.readonly-text__text h3"
         await page.wait_for_selector(player_name_selector, timeout=30000)
         st.write("Element Found!")
@@ -505,7 +508,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     results = []
 
     # Helper to run tasks in batches
-    async def gather_in_batches(tasks, batch_size=2):
+    async def gather_in_batches(tasks, batch_size=1):
         nonlocal results
         for i in range(0, len(tasks), batch_size):
             batch = tasks[i:i + batch_size]
@@ -523,7 +526,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     tasks = [scrape_player(link, age_group) for link in player_links]
 
     # Run tasks in batches
-    player_data = await gather_in_batches(tasks, batch_size=2)
+    player_data = await gather_in_batches(tasks, batch_size=1)
 
     # Finalize progress bar
     progress_bar.progress(100)
