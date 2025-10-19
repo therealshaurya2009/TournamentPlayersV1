@@ -6,7 +6,7 @@ import psutil, signal
 import shutil
 import sys
 
-# ReportLab Imports
+# eportLab Imports
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
