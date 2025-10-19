@@ -10,6 +10,8 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+USER appuser
+
 # Expose a port for Streamlit
 EXPOSE 8501
 
