@@ -240,7 +240,15 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
     retries = 0
     while retries < max_retries:
         retries += 1
-        playwright, browser, context, page = await setup_browser()        
+        playwright, browser, context, page = await setup_browser()   
+        await page.goto(player_link, wait_until="networkidle")
+        await page.wait_for_timeout(5000)  # give JS time to render
+        player_name_selector = "//*[@id='container-cdeaf649fc']/div/div[1]/div[1]/div/div/span/h3"
+        await page.wait_for_selector(f"xpath={player_name_selector}", timeout=10000)
+        locator = page.locator(player_name_selector)
+        player_name = await locator.text_content()
+        player_name = player_name.strip()
+        
         try:
             await page.goto(player_link, wait_until="networkidle")
             await page.wait_for_timeout(5000)  # give JS time to render
@@ -396,6 +404,20 @@ async def scrape_draw_size(link, selected_age_group):
 
 
 async def scrape_player(player_link, age_group):
+    player_info = await scrape_usta(player_link, age_group)
+    return {
+        "Name": player_info[0],
+        "Profile": player_link,
+        "Location": player_info[1],
+        "District": player_info[2],
+        "WTN": player_info[3],
+        "Points": player_info[4],
+        "Ranking": player_info[5],
+        "Recruiting": player_info[6],
+        "Class": player_info[8],
+        "UTR": player_info[7],
+    }
+    
     try:
         player_info = await scrape_usta(player_link, age_group)
         return {
