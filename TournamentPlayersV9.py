@@ -112,7 +112,7 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
                     timeout=timeout / 1000
                 )
 
-                # Wait for specific selector if provided
+                # ait for specific selector if provided
                 if wait_for:
                     await page.wait_for_selector(wait_for, timeout=timeout)
 
