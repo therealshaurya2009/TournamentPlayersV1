@@ -243,8 +243,10 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         playwright, browser, context, page = await setup_browser()   
         await page.goto(player_link, wait_until="networkidle")
         await page.wait_for_timeout(5000)  # give JS time to render
+        st.write("Page Open!")
         player_name_selector = "//*[@id='container-cdeaf649fc']/div/div[1]/div[1]/div/div/span/h3"
-        await page.wait_for_selector(f"xpath={player_name_selector}", timeout=10000)
+        await page.wait_for_selector(f"xpath={player_name_selector}", timeout=1000)
+        st.write("Element Found!")
         locator = page.locator(player_name_selector)
         player_name = await locator.text_content()
         player_name = player_name.strip()
