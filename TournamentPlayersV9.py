@@ -244,9 +244,6 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
         await page.goto(player_link, wait_until="networkidle")
         await page.wait_for_timeout(5000)  # give JS time to render
         st.write("Page Open!")
-        html = await page.content()
-        for i in html:
-            st.write(i)
         player_name_selector = "span.readonly-text__text h3"
         await page.wait_for_selector(player_name_selector, timeout=30000)
         st.write("Element Found!")
