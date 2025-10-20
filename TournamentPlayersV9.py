@@ -477,7 +477,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     results = []
 
     # Helper to run tasks in batches
-    async def gather_in_batches(tasks, batch_size=1):
+    async def gather_in_batches(tasks, batch_size=3):
         nonlocal results
         for i in range(0, len(tasks), batch_size):
             batch = tasks[i:i + batch_size]
@@ -495,7 +495,7 @@ async def scrape_tournament_data(tournament_url, age_group, draw_size, sort, tou
     tasks = [scrape_player(link, age_group) for link in player_links]
 
     # Run tasks in batches
-    player_data = await gather_in_batches(tasks, batch_size=1)
+    player_data = await gather_in_batches(tasks, batch_size=3)
 
     # Finalize progress bar
     progress_bar.progress(100)
