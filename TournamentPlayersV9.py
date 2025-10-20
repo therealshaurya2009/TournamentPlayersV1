@@ -105,7 +105,6 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
             url = "https://" + url.lstrip("/")
 
         for attempt in range(retries):
-            print(f"[goto_full] Attempt {attempt+1}: Navigating to {url}")
             try:
                 await asyncio.wait_for(
                     page.goto(url, wait_until="domcontentloaded"),
@@ -131,20 +130,17 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
 
                 # Log partial HTML for debugging
                 html_preview = await page.content()
-                print("[goto_full] First 1000 chars of loaded page:\n", html_preview[:1000])
-
+                
                 # Break loop if selector exists or assume page loaded
                 if not wait_for or await page.query_selector(wait_for):
                     break
 
             except (asyncio.TimeoutError, PlaywrightTimeoutError) as e:
-                print(f"[goto_full] Navigation attempt {attempt+1} failed: {e}")
                 await asyncio.sleep(3)  # wait before retry
 
     # Attach helper function to page
     page.goto_full = goto_full
 
-    print("✅ Browser setup complete and ready.")
     return playwright, browser, context, page
 
 async def age_groups_level(tournament_link):
@@ -241,18 +237,6 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
     while retries < max_retries:
         retries += 1
         playwright, browser, context, page = await setup_browser()   
-        SCRAPER_API_KEY = "CARCWL5MB9YPDE5WXOSCCZ6LX539BJZK0FB6JXVOIHN0G4319RR7NXOF8O5FV0SFWCF2C9LAQQR01LU1"
-        proxied_url = f"https://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={player_link}"
-        await page.goto(proxied_url, wait_until="networkidle")
-        await page.wait_for_timeout(5000)  # give JS time to render
-        st.write("Page Open!")
-        player_name_selector = "span.readonly-text__text h3"
-        await page.wait_for_selector(player_name_selector, timeout=30000)
-        st.write("Element Found!")
-        locator = page.locator(player_name_selector)
-        player_name = await locator.text_content()
-        player_name = player_name.strip()
-        st.write(player_name)
         
         try:
             await page.goto(player_link, wait_until="networkidle")
@@ -409,20 +393,6 @@ async def scrape_draw_size(link, selected_age_group):
 
 
 async def scrape_player(player_link, age_group):
-    player_info = await scrape_usta(player_link, age_group)
-    return {
-        "Name": player_info[0],
-        "Profile": player_link,
-        "Location": player_info[1],
-        "District": player_info[2],
-        "WTN": player_info[3],
-        "Points": player_info[4],
-        "Ranking": player_info[5],
-        "Recruiting": player_info[6],
-        "Class": player_info[8],
-        "UTR": player_info[7],
-    }
-    
     try:
         player_info = await scrape_usta(player_link, age_group)
         return {
