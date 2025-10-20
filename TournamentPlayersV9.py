@@ -80,7 +80,7 @@ async def setup_browser(retries: int = 3, timeout: int = 60000):
 
     page = await context.new_page()
 
-    # Hide Playwright automation fingerprints
+    # Hide Playwrightautomation fingerprints
     await page.add_init_script("""
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
         Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3]});
