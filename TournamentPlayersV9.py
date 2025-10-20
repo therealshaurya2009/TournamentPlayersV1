@@ -241,7 +241,9 @@ async def scrape_usta(player_link, age_group, max_retries: int = 5):
     while retries < max_retries:
         retries += 1
         playwright, browser, context, page = await setup_browser()   
-        await page.goto(player_link, wait_until="networkidle")
+        SCRAPER_API_KEY = "CARCWL5MB9YPDE5WXOSCCZ6LX539BJZK0FB6JXVOIHN0G4319RR7NXOF8O5FV0SFWCF2C9LAQQR01LU1"
+        proxied_url = f"https://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={player_link}"
+        await page.goto(proxied_url, wait_until="networkidle")
         await page.wait_for_timeout(5000)  # give JS time to render
         st.write("Page Open!")
         player_name_selector = "span.readonly-text__text h3"
